@@ -12,18 +12,29 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// API Key Management
+let userApiKey = process.env.API_KEY || '';
+
+app.post('/api/set-key', (req, res) => {
+  const { apiKey } = req.body;
+  if (!apiKey) {
+    return res.status(400).json({ error: 'API Key is required' });
+  }
+  userApiKey = apiKey;
+  res.json({ success: true, message: 'API Key saved' });
+});
+
 // API Endpoints
 const API_BASE_URL = 'https://api.jasaotp.id/v1';
 
-// Health Check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
 // Check Balance
 app.get('/api/balance', async (req, res) => {
+  if (!userApiKey) {
+    return res.status(400).json({ error: 'API Key not set' });
+  }
+  
   try {
-    const response = await fetch(`${API_BASE_URL}/balance.php?api_key=${process.env.API_KEY}`);
+    const response = await fetch(`${API_BASE_URL}/balance.php?api_key=${userApiKey}`);
     const data = await response.json();
     res.json(data);
   } catch (error) {
@@ -68,10 +79,14 @@ app.get('/api/services', async (req, res) => {
 
 // Create Order
 app.get('/api/order', async (req, res) => {
+  if (!userApiKey) {
+    return res.status(400).json({ error: 'API Key not set' });
+  }
+
   const { country, service, operator } = req.query;
   try {
     const response = await fetch(
-      `${API_BASE_URL}/order.php?api_key=${process.env.API_KEY}&negara=${country}&layanan=${service}&operator=${operator}`
+      `${API_BASE_URL}/order.php?api_key=${userApiKey}&negara=${country}&layanan=${service}&operator=${operator}`
     );
     const data = await response.json();
     res.json(data);
@@ -82,9 +97,13 @@ app.get('/api/order', async (req, res) => {
 
 // Check OTP
 app.get('/api/otp', async (req, res) => {
+  if (!userApiKey) {
+    return res.status(400).json({ error: 'API Key not set' });
+  }
+
   const { orderId } = req.query;
   try {
-    const response = await fetch(`${API_BASE_URL}/sms.php?api_key=${process.env.API_KEY}&id=${orderId}`);
+    const response = await fetch(`${API_BASE_URL}/sms.php?api_key=${userApiKey}&id=${orderId}`);
     const data = await response.json();
     res.json(data);
   } catch (error) {
@@ -94,9 +113,13 @@ app.get('/api/otp', async (req, res) => {
 
 // Cancel Order
 app.get('/api/cancel', async (req, res) => {
+  if (!userApiKey) {
+    return res.status(400).json({ error: 'API Key not set' });
+  }
+
   const { orderId } = req.query;
   try {
-    const response = await fetch(`${API_BASE_URL}/cancel.php?api_key=${process.env.API_KEY}&id=${orderId}`);
+    const response = await fetch(`${API_BASE_URL}/cancel.php?api_key=${userApiKey}&id=${orderId}`);
     const data = await response.json();
     res.json(data);
   } catch (error) {
@@ -107,12 +130,6 @@ app.get('/api/cancel', async (req, res) => {
 // Serve frontend
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Server error!');
 });
 
 app.listen(PORT, () => {
