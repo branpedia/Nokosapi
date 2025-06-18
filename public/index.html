@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Nokos - Jasa OTP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">Order Nokos</div>
+            <div class="balance-container">
+                <span>Saldo Anda: <span class="balance-value" id="balance">Rp0</span></span>
+                <button class="btn btn-primary" id="check-balance">Perbarui Saldo</button>
+                <span id="balance-loader" style="display: none;" class="loading"></span>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="card">
+            <h3 class="card-title">Pesan Nomor Kosong (Nokos)</h3>
+            
+            <div class="form-group">
+                <label for="country">Negara</label>
+                <select id="country">
+                    <option value="">Pilih Negara</option>
+                </select>
+                <span id="country-loader" style="display: none;" class="loading"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="operator">Operator</label>
+                <select id="operator" disabled>
+                    <option value="">Pilih Operator</option>
+                </select>
+                <span id="operator-loader" style="display: none;" class="loading"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="service">Layanan</label>
+                <select id="service" disabled>
+                    <option value="">Pilih Layanan</option>
+                </select>
+                <span id="service-loader" style="display: none;" class="loading"></span>
+            </div>
+            
+            <button class="btn btn-primary" id="order-btn" disabled>Pesan Nomor</button>
+            <span id="order-loader" style="display: none;" class="loading"></span>
+            
+            <div id="order-result" class="result-box" style="display: none;"></div>
+            
+            <div id="otp-container" class="otp-container" style="display: none;">
+                <div class="form-group">
+                    <label>Nomor Telepon</label>
+                    <input type="text" id="phone-number" readonly>
+                </div>
+                
+                <button class="btn btn-success" id="check-otp">Cek OTP</button>
+                <button class="btn btn-danger" id="cancel-order">Batalkan Pesanan</button>
+                
+                <div id="otp-result" class="otp-result"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3 class="card-title">Riwayat Pesanan</h3>
+            
+            <table id="order-history">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Layanan</th>
+                        <th>Nomor</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Riwayat pesanan akan dimuat di sini -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2023 Order Nokos - Menggunakan API Jasa OTP</p>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>
