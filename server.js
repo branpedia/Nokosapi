@@ -25,9 +25,10 @@ const apiKeys = {};
 // API Key Endpoint with Validation
 app.post('/api/set-key', async (req, res) => {
   try {
+    console.log('Request body:', req.body); // Debug log
+    
     const { apiKey } = req.body;
     
-    // Validation
     if (!apiKey) {
       return res.status(400).json({ 
         success: false,
@@ -35,14 +36,16 @@ app.post('/api/set-key', async (req, res) => {
       });
     }
 
+    // Validate API key format
     if (!/^[a-f0-9]{32}$/i.test(apiKey)) {
       return res.status(400).json({
         success: false,
-        message: 'Format API Key tidak valid (harus 32 karakter hexadesimal)'
+        message: 'Format API Key tidak valid'
       });
     }
 
     // Test the API key
+    console.log('Testing API key with Jasa OTP');
     const testUrl = `https://api.jasaotp.id/v1/balance.php?api_key=${apiKey}`;
     const testResponse = await fetch(testUrl);
     
