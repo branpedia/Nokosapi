@@ -19,13 +19,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Key Storage
+// API Key Storage (in-memory)
 const apiKeys = {};
 
 // API Key Endpoint with Validation
 app.post('/api/set-key', async (req, res) => {
   try {
-    console.log('Request body:', req.body); // Debug log
+    console.log('Request body:', req.body);
     
     const { apiKey } = req.body;
     
@@ -36,26 +36,28 @@ app.post('/api/set-key', async (req, res) => {
       });
     }
 
-    // Validate API key format
+    // Validate API key format (32 character hex)
     if (!/^[a-f0-9]{32}$/i.test(apiKey)) {
       return res.status(400).json({
         success: false,
-        message: 'Format API Key tidak valid'
+        message: 'Format API Key tidak valid (harus 32 karakter hexadesimal)'
       });
     }
 
-    // Test the API key
-    console.log('Testing API key with Jasa OTP');
+    // Test the API key with balance endpoint
+    console.log('Testing API key with Jasa OTP API');
     const testUrl = `https://api.jasaotp.id/v1/balance.php?api_key=${apiKey}`;
     const testResponse = await fetch(testUrl);
     
     if (!testResponse.ok) {
+      console.log('API test failed with status:', testResponse.status);
       throw new Error(`API test failed with status ${testResponse.status}`);
     }
 
     const testData = await testResponse.json();
     
     if (!testData.success) {
+      console.log('API key validation failed:', testData.message);
       return res.status(401).json({
         success: false,
         message: 'API Key tidak valid: ' + (testData.message || 'Tidak dapat mengakses API')
@@ -64,6 +66,7 @@ app.post('/api/set-key', async (req, res) => {
 
     // Store the valid key
     apiKeys.default = apiKey;
+    console.log('API key successfully validated and stored');
     
     res.json({
       success: true,
