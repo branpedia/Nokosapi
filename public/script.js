@@ -59,10 +59,18 @@ async function saveApiKey() {
         const response = await fetch('/api/set-key', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ apiKey })
         });
+
+        // First check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(text || 'Invalid server response');
+        }
 
         const data = await response.json();
         
@@ -88,9 +96,19 @@ async function saveApiKey() {
             throw new Error(data.message || 'Gagal menyimpan API Key');
         }
     } catch (error) {
+        console.error('Save API Key Error:', error);
         keyStatus.textContent = '❌ Gagal verifikasi';
         keyStatus.style.color = 'red';
-        showError(`Gagal menyimpan API Key: ${error.message}`, orderResult);
+        
+        // Handle common error messages
+        let errorMessage = error.message;
+        if (errorMessage.includes('Unexpected token')) {
+            errorMessage = 'Server mengembalikan respons tidak valid';
+        } else if (errorMessage.includes('Failed to fetch')) {
+            errorMessage = 'Tidak dapat terhubung ke server';
+        }
+        
+        showError(`Gagal menyimpan API Key: ${errorMessage}`, orderResult);
     } finally {
         saveApiKeyBtn.disabled = false;
         saveApiKeyBtn.textContent = 'Simpan API Key';
